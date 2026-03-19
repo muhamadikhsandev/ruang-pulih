@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* Menghilangkan scrollbar secara global tapi fungsi scroll tetap jalan */
+@utility scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+  
+  &::-webkit-scrollbar {
+    display: none;          /* Chrome, Safari, and Opera */
+  }
+}
+
+/* Biar smooth pas pindah antar section */
+html {
+  scroll-behavior: smooth;
+}
