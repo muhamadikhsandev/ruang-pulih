@@ -11,17 +11,19 @@ export default function CertificatePage() {
   const [inputName, setInputName] = useState("");
   const [zoom, setZoom] = useState(1);
 
-  // Logic buat ngitung scale otomatis biar pas di layar HP
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1200) {
-        const padding = 32; // px
-        const availableWidth = window.innerWidth - padding;
-        const scale = availableWidth / 1123;
-        setZoom(scale);
-      } else {
-        setZoom(1);
-      }
+      const padding = 24; 
+      const headerFooterSpace = 180; 
+      
+      const availableWidth = window.innerWidth - padding;
+      const availableHeight = window.innerHeight - headerFooterSpace;
+      
+      const scaleWidth = availableWidth / 1123;
+      const scaleHeight = availableHeight / 794;
+      
+      const finalScale = Math.min(scaleWidth, scaleHeight);
+      setZoom(finalScale > 1 ? 1 : finalScale); 
     };
 
     handleResize();
@@ -35,7 +37,6 @@ export default function CertificatePage() {
       const { generatePDF } = await import('./downloader');
       await generatePDF(certificateRef.current);
     } catch (error) {
-      console.error("Error:", error);
       alert("Gagal mengunduh PDF, coba lagi bro.");
     }
   };
@@ -49,20 +50,21 @@ export default function CertificatePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fafaf9] py-4 md:py-12 px-4 flex flex-col items-center overflow-x-hidden">
+    // Updated: min-h-dvh (Sesuai warning)
+    <main className="min-h-dvh bg-[#fafaf9] flex flex-col items-center p-4 overflow-hidden font-sans">
       
-      {/* Modal Input Nama (Tetap Responsif) */}
+      {/* Modal Input Nama */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+        // Updated: z-100 (Sesuai warning)
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
             <div className="text-center mb-6">
-              <div className="bg-emerald-50 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="text-emerald-600" size={28} />
+              <div className="bg-emerald-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="text-emerald-600" size={32} />
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-stone-800">Tulis Namamu</h2>
-              <p className="text-stone-500 text-xs md:text-sm mt-2 px-4">Nama ini akan terukir di Sertifikat Apresiasi Dirimu.</p>
+              <h2 className="text-2xl font-bold text-stone-800 tracking-tight">Tulis Namamu</h2>
+              <p className="text-stone-500 text-sm mt-2">Nama ini akan terukir di Sertifikat Apresiasi Dirimu.</p>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <input 
                 type="text"
@@ -70,12 +72,9 @@ export default function CertificatePage() {
                 placeholder="Masukkan nama lengkap..."
                 value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
-                className="w-full px-5 py-3.5 md:py-4 bg-stone-100 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-xl md:rounded-2xl outline-none transition-all font-semibold text-stone-800 text-sm md:text-base"
+                className="w-full px-6 py-4 bg-stone-100 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition-all font-semibold text-stone-800"
               />
-              <button 
-                type="submit"
-                className="w-full py-3.5 md:py-4 bg-emerald-600 text-white rounded-xl md:rounded-2xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 text-sm md:text-base"
-              >
+              <button type="submit" className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200 active:scale-95 transition-all">
                 Terapkan Nama
               </button>
             </form>
@@ -83,86 +82,91 @@ export default function CertificatePage() {
         </div>
       )}
 
-      {/* Navigasi - Stick to Top on Mobile */}
-      <div className="max-w-4xl w-full flex justify-between items-center mb-6 md:mb-12">
-        <Link href="/" className="flex items-center gap-2 text-[#a8a29e] hover:text-[#047857] transition-colors">
-          <Home size={18} />
-          <span className="font-semibold text-xs md:text-sm">Beranda</span>
+      {/* Navigasi */}
+      <nav className="w-full max-w-4xl flex justify-between items-center mb-6 shrink-0">
+        <Link href="/" className="flex items-center gap-2 text-stone-400 hover:text-emerald-700 transition-colors">
+          <Home size={20} />
+          <span className="font-bold text-sm tracking-tight">Beranda</span>
         </Link>
         <button 
           onClick={handleDownload}
-          className="flex items-center gap-2 bg-[#10b981] text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-bold text-xs md:text-sm shadow-lg shadow-[#d1fae5] hover:bg-[#059669] transition-all active:scale-95"
+          className="flex items-center gap-2 bg-emerald-500 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-emerald-100 active:scale-95 transition-all"
         >
-          <Download size={14} /> <span className="hidden xs:inline">Unduh PDF</span><span className="xs:hidden">Unduh</span>
+          <Download size={16} /> <span>Unduh PDF</span>
         </button>
-      </div>
+      </nav>
 
-      {/* Container Sertifikat dengan Magic Scaling */}
-      <div 
-        className="relative flex justify-center items-start w-full overflow-hidden"
-        style={{ height: zoom < 1 ? `${794 * zoom}px` : '794px' }} // Jaga tinggi container biar gak kosong bawahnya
-      >
+      {/* Area Sertifikat */}
+      <div className="flex-1 w-full flex items-center justify-center overflow-hidden relative">
         <div 
           ref={certificateRef}
           style={{ 
             transform: `scale(${zoom})`,
-            transformOrigin: 'top center',
-            color: '#1c1917'
+            transformOrigin: 'center center',
           }}
-          className="relative w-[1123px] h-[794px] bg-[#ffffff] border-[16px] border-[#ecfdf5] p-2 flex flex-col shadow-2xl flex-shrink-0"
+          // Updated: w-280.75, h-198.5, border-16 (Sesuai warning)
+          className="w-280.75 h-198.5 bg-white border-16 border-[#ecfdf5] p-2 flex flex-col shadow-2xl shrink-0"
         >
           <div className="flex-1 border-2 border-[#d1fae5] m-1 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center">
             
-            <div className="absolute top-[-25%] right-[-15%] w-[500px] h-[500px] bg-[#d1fae5] opacity-40 rounded-full blur-3xl" />
+            {/* Background Ornaments */}
+            {/* Updated: w-125, h-125 (Sesuai warning) */}
+            <div className="absolute top-[-25%] right-[-15%] w-125 h-125 bg-[#d1fae5] opacity-40 rounded-full blur-3xl" />
             <div className="absolute bottom-[-20%] left-[-10%] w-96 h-96 bg-[#f0fdfa] rounded-full blur-3xl" />
             
             <div className="relative z-10 flex flex-col items-center mb-8">
               <div className="p-5 bg-[#f0fdf4] rounded-full mb-4 border border-[#d1fae5] relative">
-                <Award size={48} className="text-[#059669]" />
-                <Leaf size={16} className="absolute -top-1 -right-1 text-[#34d399]" />
+                <Award size={54} className="text-[#059669]" />
+                <Leaf size={18} className="absolute -top-1 -right-1 text-[#34d399]" />
               </div>
-              <h1 className="text-[11px] font-bold uppercase tracking-[0.5em] text-[#047857] opacity-70">Sertifikat Apresiasi Diri</h1>
+              <h1 className="text-[12px] font-black uppercase tracking-[0.6em] text-[#047857] opacity-60">Sertifikat Apresiasi Diri</h1>
             </div>
 
             <div className="relative z-10 max-w-3xl">
-              <h2 className="text-6xl font-serif italic font-semibold text-[#064e3b] mb-6 tracking-tight">Langkah Menuju Pulih</h2>
-              <div className="mb-12 py-4 border-b-2 border-[#d1fae5] inline-block px-14 relative">
-                <p className="text-[10px] uppercase text-[#10b981] font-bold mb-2 tracking-widest">Diberikan kepada</p>
-                <h3 className="text-5xl font-extrabold text-[#1c1917]">{userName}</h3>
-                <div className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 bg-[#ffffff] px-2">
-                   <ShieldCheck size={12} className="text-[#6ee7b7]" />
+              <h2 className="text-7xl font-serif italic font-semibold text-[#064e3b] mb-6 tracking-tighter">Langkah Menuju Pulih</h2>
+              <div className="mb-12 py-5 border-b-2 border-[#d1fae5] inline-block px-16 relative">
+                <p className="text-[11px] uppercase text-[#10b981] font-black mb-3 tracking-[0.3em]">Diberikan kepada</p>
+                <h3 className="text-6xl font-black text-[#1c1917] tracking-tight">{userName}</h3>
+                {/* Updated: -bottom-2.5 (Sesuai warning) */}
+                <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-white px-3">
+                   <ShieldCheck size={18} className="text-[#6ee7b7]" />
                 </div>
               </div>
+              <p className="text-stone-500 text-sm max-w-xl mx-auto leading-relaxed font-medium">
+                Atas keberanianmu melangkah, mengakui luka, dan memilih untuk tetap tumbuh. 
+                Kamu adalah bukti bahwa kesembuhan adalah perjalanan yang layak diperjuangkan.
+              </p>
             </div>
 
-            <div className="relative z-10 w-full flex justify-between items-end mt-12 px-12 text-left">
+            <div className="relative z-10 w-full flex justify-between items-end mt-16 px-12 text-left">
               <div className="flex items-center gap-6">
-                <div className="p-2 bg-[#ffffff] border border-[#d1fae5] rounded-lg">
-                  <QRCodeCanvas value={`https://ruang-pulih.com/v/${encodeURIComponent(userName)}`} size={70} level="H" />
+                <div className="p-3 bg-white border border-[#d1fae5] rounded-2xl shadow-sm">
+                  <QRCodeCanvas value={`https://ruang-pulih.com/v/${encodeURIComponent(userName)}`} size={80} level="H" />
                 </div>
                 <div>
-                  <span className="text-sm font-bold uppercase text-[#064e3b] block mb-1 leading-none">Ruang Pulih</span>
-                  <p className="text-[9px] text-[#059669] opacity-70 font-bold leading-none uppercase">ID: RP-{Math.floor(1000 + Math.random() * 9000)}</p>
+                  <span className="text-md font-black uppercase text-[#064e3b] block mb-1">Ruang Pulih</span>
+                  <p className="text-[10px] text-[#059669] font-bold uppercase tracking-widest">ID: RP-{Math.floor(1000 + Math.random() * 9000)}</p>
                 </div>
               </div>
 
               <div className="flex flex-col items-center">
-                <p className="font-serif italic text-4xl text-[#064e3b] opacity-40 mb-[-10px]">M. Ikhsan</p>
-                <div className="w-44 h-[1.5px] bg-[#d1fae5] mb-2" />
-                <p className="text-[10px] font-bold uppercase text-[#0c0a09] tracking-wider">Muhamad Ikhsan</p>
-                <p className="text-[9px] text-[#059669] font-bold uppercase">Konselor Utama</p>
+                {/* Updated: -mb-3 (Sesuai warning) */}
+                <p className="font-serif italic text-5xl text-[#064e3b] opacity-30 -mb-3 select-none">M. Ikhsan</p>
+                {/* Updated: h-0.5 (Sesuai warning) */}
+                <div className="w-52 h-0.5 bg-[#d1fae5] mb-2" />
+                <p className="text-[11px] font-black uppercase text-[#1c1917] tracking-[0.2em]">Muhamad Ikhsan</p>
+                <p className="text-[9px] text-[#059669] font-bold uppercase tracking-widest">Konselor Utama & Pengembang</p>
               </div>
             </div>
 
-            <div className="absolute top-6 left-6 border-t-2 border-l-2 border-[#d1fae5] w-12 h-12" />
-            <div className="absolute bottom-6 right-6 border-b-2 border-r-2 border-[#d1fae5] w-12 h-12" />
+            <div className="absolute top-8 left-8 border-t-4 border-l-4 border-[#d1fae5] w-16 h-16 rounded-tl-xl" />
+            <div className="absolute bottom-8 right-8 border-b-4 border-r-4 border-[#d1fae5] w-16 h-16 rounded-br-xl" />
           </div>
         </div>
       </div>
 
-      <div className="mt-8 text-[#a8a29e] text-[10px] font-medium text-center px-6">
-        *Saran: Gunakan tampilan Desktop atau Landscape untuk preview terbaik. <br/>
-        Hasil PDF akan tetap berkualitas A4 Landscape.
+      <div className="mt-auto pt-6 text-stone-400 text-[10px] font-bold text-center tracking-widest uppercase shrink-0">
+        *Preview otomatis menyesuaikan layar perangkatmu
       </div>
     </main>
   );
