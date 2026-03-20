@@ -4,16 +4,16 @@ export const generatePDF = async (element: HTMLElement): Promise<void> => {
     const html2pdf = (await import('html2pdf.js')).default;
     if (!element) return;
 
-    // SIMPAN STYLE ASLI
-    const originalTransform = element.style.transform;
-    const originalPosition = element.style.position;
-    const originalShadow = element.style.boxShadow;
-
-    // PERSIPKAN UNTUK RENDER
-    // Kita paksa ke posisi static dan tanpa transform agar terdeteksi penuh oleh canvas
-    element.style.transform = 'none';
-    element.style.position = 'relative';
-    element.style.boxShadow = 'none';
+    // TRIK CLONE: Bikin duplikat elemen agar style aslinya di layar gak keganggu
+    const clone = element.cloneNode(true) as HTMLElement;
+    
+    // Reset style di clone agar murni ukuran asli
+    clone.style.transform = 'none';
+    clone.style.position = 'relative';
+    clone.style.display = 'flex';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.boxShadow = 'none';
 
     const options = {
       margin: 0,
@@ -33,16 +33,8 @@ export const generatePDF = async (element: HTMLElement): Promise<void> => {
       }
     };
 
-    // Kasih napas 100ms buat browser render ulang state 'transform: none'
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    // Eksekusi
-    await html2pdf().set(options).from(element).save();
-
-    // KEMBALIKAN STYLE PREVIEW
-    element.style.transform = originalTransform;
-    element.style.position = originalPosition;
-    element.style.boxShadow = originalShadow;
+    // Render dari CLONE, bukan dari elemen yang nempel di layar
+    await html2pdf().set(options).from(clone).save();
 
     console.log("PDF Berhasil diunduh!");
   } catch (error) {

@@ -13,9 +13,8 @@ export default function CertificatePage() {
 
   useEffect(() => {
     const handleResize = () => {
-      const padding = 32; 
-      const availableWidth = window.innerWidth - padding;
-      const availableHeight = window.innerHeight - 200; 
+      const availableWidth = window.innerWidth - 48; // Padding lebih luas
+      const availableHeight = window.innerHeight - 220; 
       
       const scaleWidth = availableWidth / 1123;
       const scaleHeight = availableHeight / 794;
@@ -87,16 +86,15 @@ export default function CertificatePage() {
       </nav>
 
       {/* AREA SERTIFIKAT */}
-      <div className="flex-1 w-full flex items-center justify-center relative overflow-hidden">
+      <div className="flex-1 w-full flex items-center justify-center relative">
         <div 
           ref={certificateRef}
           style={{ 
             transform: `scale(${zoom})`,
             transformOrigin: 'center center',
             backgroundColor: '#ffffff',
-            position: 'absolute',
           }}
-          className="w-280.75 h-198.5 border-16 border-[#ecfdf5] p-2 flex flex-col shadow-2xl shrink-0"
+          className="w-[1123px] h-[794px] border-16 border-[#ecfdf5] p-2 flex flex-col shadow-2xl shrink-0 absolute"
         >
           <div className="flex-1 border-2 border-[#d1fae5] m-1 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center">
             
@@ -133,7 +131,7 @@ export default function CertificatePage() {
                 </div>
                 <div>
                   <span className="text-md font-black uppercase text-[#064e3b] block mb-1 leading-none">Ruang Pulih</span>
-                  <p className="text-[10px] text-[#059669] font-bold uppercase tracking-widest">Verifikasi Digital Aktif</p>
+                  <p className="text-[10px] text-[#059669] font-bold uppercase tracking-widest">ID: RP-{Math.floor(1000 + Math.random() * 9000)}</p>
                 </div>
               </div>
 
@@ -152,7 +150,7 @@ export default function CertificatePage() {
       </div>
 
       <div className="mt-auto pt-4 text-[#a8a29e] text-[10px] font-bold text-center tracking-widest uppercase shrink-0">
-        *Tampilan dioptimalkan untuk perangkatmu
+        *Preview otomatis menyesuaikan layar perangkatmu
       </div>
     </main>
   );
