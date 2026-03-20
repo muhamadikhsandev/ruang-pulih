@@ -1,29 +1,35 @@
 "use client";
 import React, { useRef, useState, useEffect } from 'react';
-import { Award, Download, Home, Leaf, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Award, Download, Home, Leaf, ShieldCheck, CheckCircle2, Edit3, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import { toJpeg } from 'html-to-image'; 
 import { jsPDF } from 'jspdf';
+
+const TEMPLATES = [
+  { id: 'emerald', accent: '#059669', light: '#d1fae5', ultraLight: '#f0fdf4', text: '#064e3b' },
+  { id: 'blue', accent: '#2563eb', light: '#dbeafe', ultraLight: '#eff6ff', text: '#1e3a8a' },
+  { id: 'pink', accent: '#db2777', light: '#fce7f3', ultraLight: '#fdf2f8', text: '#831843' },
+  { id: 'purple', accent: '#7c3aed', light: '#ede9fe', ultraLight: '#f5f3ff', text: '#4c1d95' },
+  { id: 'orange', accent: '#ea580c', light: '#ffedd5', ultraLight: '#fff7ed', text: '#7c2d12' },
+];
 
 export default function CertificatePage() {
   const hiddenRef = useRef<HTMLDivElement>(null); 
   const [userName, setUserName] = useState("Jiwa yang Berani");
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [inputName, setInputName] = useState("");
-  const [zoom, setZoom] = useState(1);
+  const [activeTemplate, setActiveTemplate] = useState(0);
+  const [zoom, setZoom] = useState(0.3);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Auto-scaling biar preview muat di layar HP/Laptop
   useEffect(() => {
     const handleResize = () => {
-      const padding = 32; 
+      const padding = window.innerWidth < 768 ? 32 : 64;
       const availableWidth = window.innerWidth - padding;
-      const availableHeight = window.innerHeight - 220; 
-      const scaleWidth = availableWidth / 1123;
-      const scaleHeight = availableHeight / 794;
-      const finalScale = Math.min(scaleWidth, scaleHeight);
-      setZoom(finalScale > 1 ? 1 : finalScale); 
+      const availableHeight = window.innerHeight - 340; 
+      const scale = Math.min(availableWidth / 1123, availableHeight / 794);
+      setZoom(scale);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -31,188 +37,130 @@ export default function CertificatePage() {
   }, []);
 
   const handleDownload = async () => {
-    if (!hiddenRef.current) return;
+    if (!hiddenRef.current || isDownloading) return;
     setIsDownloading(true);
-    
     try {
-      // Optimasi Gambar: JPEG + Ratio 2 + Quality 0.7 (File Kecil & Tajam)
-      const dataUrl = await toJpeg(hiddenRef.current, { 
-        quality: 0.7, 
-        pixelRatio: 2, 
-        cacheBust: true,
-        backgroundColor: '#ffffff'
-      });
-
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4',
-        compress: true 
-      });
-
-      pdf.addImage(dataUrl, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
-      pdf.save(`Sertifikat-Ruang-Pulih-${userName.replace(/\s+/g, '-')}.pdf`);
-      
+      const dataUrl = await toJpeg(hiddenRef.current, { quality: 0.95, pixelRatio: 2 });
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      pdf.addImage(dataUrl, 'JPEG', 0, 0, 297, 210);
+      pdf.save(`Sertifikat-${userName.replace(/\s+/g, '-')}.pdf`);
     } catch (err) {
-      console.error("Gagal download:", err);
-      alert("Waduh, gagal download sertifikatnya bro. Coba lagi ya!");
-    } finally {
-      setIsDownloading(false);
-    }
+      alert("Gagal mengunduh sertifikat.");
+    } finally { setIsDownloading(false); }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputName.trim()) {
-      setUserName(inputName);
-      setIsModalOpen(false);
-    }
-  };
+  const theme = TEMPLATES[activeTemplate];
 
-  // --- KOMPONEN INTI SERTIFIKAT ---
-  const CertificateContent = () => {
-    const verifyUrl = `https://ruangpulih.vercel.app/verify/${encodeURIComponent(userName)}`;
-    
-    return (
-      <div className="flex-1 border-2 border-[#d1fae5] m-1 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center bg-white">
-        {/* Background Blur Ornaments */}
-        <div className="absolute top-[-25%] right-[-15%] w-[500px] h-[500px] bg-[#d1fae5] opacity-40 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[384px] h-[384px] bg-[#f0fdfa] rounded-full blur-3xl" />
-        
-        <div className="relative z-10 flex flex-col items-center mb-8">
-          <div className="p-5 bg-[#f0fdf4] rounded-full mb-4 border border-[#d1fae5] relative">
-            <Award size={54} className="text-[#059669]" />
-            <Leaf size={18} className="absolute -top-1 -right-1 text-[#34d399]" />
-          </div>
-          <h1 className="text-[12px] font-black uppercase tracking-[0.6em] text-[#047857] opacity-60">Sertifikat Apresiasi Diri</h1>
+  const CertificateContent = () => (
+    <div className="flex-1 border-2 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center bg-white" style={{ borderColor: theme.light }}>
+      <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full blur-3xl opacity-30" style={{ backgroundColor: theme.light }} />
+      <div className="absolute bottom-[-15%] left-[-5%] w-[400px] h-[400px] rounded-full blur-3xl opacity-20" style={{ backgroundColor: theme.ultraLight }} />
+      
+      <div className="relative z-10 flex flex-col items-center mb-6">
+        <div className="p-5 rounded-full mb-4 border relative" style={{ backgroundColor: theme.ultraLight, borderColor: theme.light }}>
+          <Award size={54} style={{ color: theme.accent }} />
+          <Leaf size={18} className="absolute -top-1 -right-1" style={{ color: theme.accent }} />
         </div>
-
-        <div className="relative z-10 max-w-3xl">
-          <h2 className="text-7xl font-serif italic font-semibold text-[#064e3b] mb-6 tracking-tighter">Langkah Menuju Pulih</h2>
-          <div className="mb-12 py-5 border-b-2 border-[#d1fae5] inline-block px-16 relative">
-            <p className="text-[11px] uppercase text-[#10b981] font-black mb-3 tracking-[0.3em]">Diberikan kepada</p>
-            <h3 className="text-6xl font-black text-[#1c1917] tracking-tight">{userName}</h3>
-            <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 bg-[#ffffff] px-3">
-               <ShieldCheck size={18} className="text-[#6ee7b7]" />
-            </div>
-          </div>
-          <p className="text-[#57534e] text-sm max-w-xl mx-auto leading-relaxed font-medium">
-            Atas keberanianmu melangkah, mengakui luka, dan memilih untuk tetap tumbuh. 
-            Kamu adalah bukti bahwa kesembuhan adalah perjalanan yang layak diperjuangkan.
-          </p>
-        </div>
-
-        {/* Footer Area: QR & Signature */}
-        <div className="relative z-10 w-full flex justify-between items-end mt-16 px-12 text-left">
-          <div className="flex items-center gap-6">
-            {/* QR CODE - BISA DI-SCAN & DI-KLIK */}
-            <a 
-              href={verifyUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="p-3 bg-white border border-[#d1fae5] rounded-2xl shadow-sm hover:scale-105 transition-transform cursor-pointer block"
-              title="Klik untuk verifikasi digital"
-            >
-              <QRCodeCanvas 
-                value={verifyUrl} 
-                size={80} 
-                level="H" 
-                bgColor={"#ffffff"}
-                fgColor={"#064e3b"}
-              />
-            </a>
-            <div>
-              <span className="text-md font-black uppercase text-[#064e3b] block mb-1 leading-none">Ruang Pulih</span>
-              <p className="text-[10px] text-[#059669] font-bold uppercase tracking-widest flex items-center gap-1">
-                <CheckCircle2 size={10} /> Verifikasi Digital Aktif
-              </p>
-              <p className="text-[8px] text-[#a8a29e] mt-1 italic">Klik QR untuk cek keaslian</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <p className="font-serif italic text-5xl text-[#064e3b] opacity-30 mb-[-12px] select-none">M. Ikhsan</p>
-            <div className="w-52 h-[2px] bg-[#d1fae5] mb-2" />
-            <p className="text-[11px] font-black uppercase text-[#1c1917] tracking-[0.2em]">Muhamad Ikhsan</p>
-            <p className="text-[9px] text-[#059669] font-bold uppercase tracking-widest">Konselor Utama & Pengembang</p>
-          </div>
-        </div>
-        
-        {/* Border Corners */}
-        <div className="absolute top-8 left-8 border-t-4 border-l-4 border-[#d1fae5] w-16 h-16 rounded-tl-xl" />
-        <div className="absolute bottom-8 right-8 border-b-4 border-r-4 border-[#d1fae5] w-16 h-16 rounded-br-xl" />
+        <h1 className="text-[11px] font-black uppercase tracking-[0.5em] opacity-70" style={{ color: theme.text }}>Digital Recovery Certificate</h1>
       </div>
-    );
-  };
+
+      <div className="relative z-10 w-full px-8">
+        <h2 className="text-7xl font-serif italic font-semibold mb-6 tracking-tighter" style={{ color: theme.text }}>Langkah Menuju Pulih</h2>
+        <div className="mb-8 py-4 border-b-2 inline-block px-20 relative" style={{ borderColor: theme.light }}>
+          <p className="text-[10px] uppercase font-black mb-2 tracking-[0.3em]" style={{ color: theme.accent }}>Diberikan kepada sosok tangguh</p>
+          <h3 className="text-6xl font-black text-stone-900 tracking-tight mb-2">{userName}</h3>
+          <div className="absolute -bottom-[12px] left-1/2 -translate-x-1/2 bg-white px-4">
+             <ShieldCheck size={24} style={{ color: theme.accent }} />
+          </div>
+        </div>
+        <p className="text-stone-600 text-sm max-w-2xl mx-auto leading-relaxed font-medium mb-6">
+          Atas keberanianmu mengakui luka dan memilih untuk tetap bertumbuh. 
+          Sertifikat ini adalah saksi bisu perjalananmu menuju diri yang lebih utuh.
+        </p>
+        <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest" style={{ borderColor: theme.light, color: theme.accent, backgroundColor: theme.ultraLight }}>
+          <Sparkles size={12} /> Terverifikasi Ruang Pulih 2026
+        </div>
+      </div>
+
+      <div className="relative z-10 w-full flex justify-between items-end mt-12 px-16">
+        <div className="flex items-center gap-6 text-left">
+          <div className="p-2 bg-white border rounded-xl shadow-sm" style={{ borderColor: theme.light }}>
+            <QRCodeCanvas value={`verify-${userName}`} size={70} level="H" fgColor={theme.text} />
+          </div>
+          <div>
+            <span className="text-md font-black uppercase block mb-1 leading-none" style={{ color: theme.text }}>Ruang Pulih</span>
+            <p className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1" style={{ color: theme.accent }}><CheckCircle2 size={10} /> Valid Digital Signature</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-center">
+          <p className="font-serif italic text-4xl opacity-20 mb-[-10px] select-none" style={{ color: theme.text }}>M. Ikhsan</p>
+          <div className="w-48 h-[1.5px] mb-2" style={{ backgroundColor: theme.light }} />
+          <p className="text-[10px] font-black uppercase text-stone-900 tracking-[0.2em]">Muhamad Ikhsan</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <main className="min-h-dvh bg-[#fafaf9] flex flex-col items-center p-4 overflow-hidden font-sans">
-      
-      {/* 1. MASTER RENDER (Hidden) - Area Kerja untuk PDF */}
-      <div className="fixed left-[-9999px] top-0 pointer-events-none">
-        <div ref={hiddenRef} className="w-[1123px] h-[794px] border-[16px] border-[#ecfdf5] p-2 flex flex-col bg-white">
+    <main className="fixed inset-0 bg-[#fafaf9] flex flex-col items-center overflow-hidden font-sans">
+      {/* 1. Master Render (Export Only) */}
+      <div className="absolute left-[-9999px] top-0 pointer-events-none">
+        <div ref={hiddenRef} className="w-[1123px] h-[794px] border-[16px] p-2 flex flex-col bg-white" style={{ borderColor: theme.ultraLight }}>
           <CertificateContent />
         </div>
       </div>
 
-      {/* 2. MODAL INPUT NAMA */}
+      {/* 2. Modal Name Input */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl scale-in-center">
-            <h2 className="text-2xl font-bold text-center mb-6 text-[#1c1917]">Siapa Namamu?</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input 
-                type="text" autoFocus value={inputName}
-                onChange={(e) => setInputName(e.target.value)}
-                className="w-full px-6 py-4 bg-[#f5f5f4] rounded-2xl outline-none border-2 border-transparent focus:border-[#10b981] font-semibold text-lg transition-all"
-                placeholder="Tulis nama lengkap..."
-              />
-              <button type="submit" className="w-full py-4 bg-[#059669] text-white rounded-2xl font-bold hover:bg-[#047857] transition-all active:scale-95 shadow-lg shadow-[#059669]/20">
-                Buat Sertifikat Sekarang
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-md">
+          <div className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in fade-in zoom-in-95">
+            <h2 className="text-2xl font-bold text-center mb-6 text-stone-800">Nama Sertifikat</h2>
+            <form onSubmit={(e) => { e.preventDefault(); if(inputName) { setUserName(inputName); setIsModalOpen(false); } }} className="space-y-4">
+              <input type="text" autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} className="w-full px-6 py-4 bg-stone-50 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold text-center" placeholder="Nama Lengkap" />
+              <button type="submit" className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform">Terbitkan</button>
             </form>
           </div>
         </div>
       )}
 
-      {/* 3. NAVIGATION BAR */}
-      <nav className="w-full max-w-4xl flex justify-between items-center mb-6 shrink-0 z-50 px-2">
-        <Link href="/" className="flex items-center gap-2 text-[#a8a29e] hover:text-[#047857] transition-colors group">
-          <div className="p-2 bg-white rounded-full shadow-sm group-hover:bg-[#f0fdf4] transition-colors">
-            <Home size={18} className="text-[#1c1917]" />
-          </div>
-          <span className="font-bold text-sm text-[#1c1917]">Beranda</span>
-        </Link>
-        <button 
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="flex items-center gap-2 bg-[#10b981] text-white px-7 py-3 rounded-full font-bold text-sm shadow-xl hover:bg-[#059669] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isDownloading ? (
-            <span className="flex items-center gap-2 italic">Mengompres PDF...</span>
-          ) : (
-            <>
-              <Download size={18} /> <span>Simpan PDF HD</span>
-            </>
-          )}
+      {/* 3. Top Navigation */}
+      <nav className="w-full max-w-5xl flex justify-between items-center px-4 py-4 md:px-8 md:py-6 shrink-0 z-50">
+        <div className="flex gap-2">
+          <Link href="/" className="p-3 bg-white rounded-full shadow-sm border border-stone-100"><Home size={20} /></Link>
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-full font-bold text-xs transition-all active:scale-95"><Edit3 size={14} /> Nama</button>
+        </div>
+        <button onClick={handleDownload} disabled={isDownloading} className="bg-stone-900 text-white px-6 py-2.5 rounded-full font-bold text-xs shadow-xl active:scale-95 transition-all disabled:opacity-50">
+          {isDownloading ? "..." : "Simpan PDF"}
         </button>
       </nav>
 
-      {/* 4. PREVIEW AREA (User View) */}
-      <div className="flex-1 w-full flex items-center justify-center relative">
+      {/* 4. Responsive Preview Area */}
+      <div className="flex-1 w-full flex items-center justify-center p-4 relative overflow-hidden">
         <div 
           style={{ 
-            transform: `scale(${zoom})`,
+            width: '1123px', 
+            height: '794px', 
+            transform: `scale(${zoom})`, 
             transformOrigin: 'center center',
+            borderColor: theme.ultraLight 
           }}
-          className="w-[1123px] h-[794px] border-[16px] border-[#ecfdf5] p-2 flex flex-col shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] shrink-0 absolute bg-white"
+          className="border-[16px] p-2 flex flex-col shadow-2xl bg-white transition-all duration-500 ease-out shrink-0"
         >
           <CertificateContent />
         </div>
       </div>
 
-      <div className="mt-auto pt-6 text-[#a8a29e] text-[10px] font-black text-center tracking-[0.4em] uppercase opacity-60">
-        Ruang Pulih • Digital Certificate • 2026
+      {/* 5. Mobile-Friendly Template Switcher */}
+      <div className="py-6 flex flex-col items-center gap-4 z-50 bg-white/80 w-full backdrop-blur-md border-t border-stone-100 shrink-0">
+        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-400">Pilih Tema Sertifikat</p>
+        <div className="flex gap-5">
+          {TEMPLATES.map((t, i) => (
+            <button key={t.id} onClick={() => setActiveTemplate(i)}
+              className={`w-6 h-6 rounded-full transition-all duration-300 ring-offset-4 ${activeTemplate === i ? 'ring-2 scale-125' : 'opacity-30 hover:opacity-100'}`}
+              style={{ backgroundColor: t.accent, ringColor: t.accent }}
+            />
+          ))}
+        </div>
       </div>
     </main>
   );

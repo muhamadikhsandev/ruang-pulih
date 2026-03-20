@@ -1,9 +1,7 @@
 "use client";
 import React, { useState, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Import komponen yang sudah dipisah
-// Pakai ../ untuk keluar dari folder app ke root, lalu masuk ke components
+// Import komponen
 import WelcomeScreen from './components/WelcomeScreen';
 import AffirmationScreen from './components/AffirmationScreen';
 import Chapter1 from './components/Chapter1';
@@ -15,11 +13,7 @@ import FinalDashboard from './components/FinalDashboard';
 
 export default function RuangPulih() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  
-  // State untuk menyimpan skor dari setiap bab secara terpusat
   const [scores, setScores] = useState({ c1: 0, c2: 0, c3: 0, c4: 0, c5: 0 });
-  
-  // Trik untuk reset state anak komponen secara instan tanpa loading
   const [resetKey, setResetKey] = useState(0);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -33,8 +27,6 @@ export default function RuangPulih() {
   const handleReset = () => {
     setScores({ c1: 0, c2: 0, c3: 0, c4: 0, c5: 0 });
     setResetKey(prev => prev + 1); 
-    
-    // Scroll balik ke layar pertama
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
     }
@@ -43,25 +35,19 @@ export default function RuangPulih() {
   return (
     <main className="relative w-full h-dvh overflow-hidden bg-pink-50 font-sans selection:bg-pink-200">
       
-      {/* DESKTOP NAVIGATION BUTTONS */}
-      <div className="hidden md:flex absolute inset-y-0 left-4 items-center z-50">
-        <button onClick={() => scroll('left')} className="p-3 bg-white/50 hover:bg-white rounded-full shadow-lg text-pink-400 transition-all active:scale-90">
-          <ChevronLeft size={32} />
-        </button>
-      </div>
-      <div className="hidden md:flex absolute inset-y-0 right-4 items-center z-50">
-        <button onClick={() => scroll('right')} className="p-3 bg-white/50 hover:bg-white rounded-full shadow-lg text-pink-400 transition-all active:scale-90">
-          <ChevronRight size={32} />
-        </button>
-      </div>
+      {/* Tombol Navigasi Desktop Dihapus untuk Fokus pada Navigasi Alur (onNext) */}
 
       <div
         ref={scrollRef}
         className="flex flex-row w-full h-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scroll-smooth"
       >
+        {/* Navigasi untuk Welcome */}
         <WelcomeScreen onNext={() => scroll('right')} />
-        <AffirmationScreen />
         
+        {/* PERBAIKAN: Menambahkan onNext agar fungsi scroll('right') terkirim ke komponen */}
+        <AffirmationScreen onNext={() => scroll('right')} />
+        
+        {/* Navigasi untuk Chapters */}
         <Chapter1 key={`c1-${resetKey}`} onNext={() => scroll('right')} onScoreUpdate={(val) => setScores(p => ({ ...p, c1: val }))} />
         <Chapter2 key={`c2-${resetKey}`} onNext={() => scroll('right')} onScoreUpdate={(val) => setScores(p => ({ ...p, c2: val }))} />
         <Chapter3 key={`c3-${resetKey}`} onNext={() => scroll('right')} onScoreUpdate={(val) => setScores(p => ({ ...p, c3: val }))} />
