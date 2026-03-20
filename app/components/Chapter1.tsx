@@ -22,7 +22,7 @@ export default function Chapter1({ onNext, onScoreUpdate }: ChapterProps) {
     "Apakah kamu sering mengkritik dirimu sendiri dengan kata-kata kasar?",
     "Apakah kamu merasa harus menyembunyikan emosi sedihmu?",
     "Seringkah kamu merasa cemas tanpa alasan yang jelas di keramaian?",
-    "Apakah kamu merasa sulit mempercayai niat baik orang lain?"
+    "Apakah kamu merasakan sulit mempercayai niat baik orang lain?"
   ];
 
   const handleAnswer = (isYes: boolean) => {
