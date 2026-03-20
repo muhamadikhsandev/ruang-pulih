@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
-import { Moon, MessageCircle, RotateCcw, Sparkles } from 'lucide-react';
+import { Moon, MessageCircle, RotateCcw, Sparkles, Award } from 'lucide-react';
+import Link from 'next/link';
 
 interface Scores {
   c1: number;
@@ -63,9 +64,36 @@ export default function FinalDashboard({ scores, onReset }: { scores: Scores, on
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <button onClick={onReset} className="flex items-center justify-center gap-2 py-4 border-2 border-stone-200 rounded-2xl font-bold text-stone-500 hover:bg-stone-100 transition-all"><RotateCcw size={18} /> Ulangi</button>
-          <button onClick={sendToWA} className="flex items-center justify-center gap-2 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all"><MessageCircle size={18} /> Konsultasi</button>
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <button 
+              onClick={onReset} 
+              className="flex items-center justify-center gap-2 py-4 border-2 border-stone-200 rounded-2xl font-bold text-stone-500 hover:bg-stone-100 transition-all active:scale-95"
+            >
+              <RotateCcw size={18} /> Ulangi
+            </button>
+            <button 
+              onClick={sendToWA} 
+              className="flex items-center justify-center gap-2 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95"
+            >
+              <MessageCircle size={18} /> Konsultasi
+            </button>
+          </div>
+
+          {/* TOMBOL SERTIFIKAT */}
+          <Link 
+            href="/certificate" 
+            className="flex items-center justify-center gap-3 py-4 bg-stone-800 text-white rounded-2xl font-bold shadow-xl hover:bg-black transition-all active:scale-[0.98] group"
+          >
+            <Award size={20} className="group-hover:rotate-12 transition-transform" />
+            Ambil Sertifikat Pulih
+          </Link>
+        </div>
+        
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-stone-400 font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+            <Sparkles size={12} /> Teruslah Bertumbuh <Sparkles size={12} />
+          </p>
         </div>
       </div>
     </section>
