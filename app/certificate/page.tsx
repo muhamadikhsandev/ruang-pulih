@@ -3,11 +3,11 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Award, Download, Home, Leaf, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
-import { toPng } from 'html-to-image';
+import { toJpeg } from 'html-to-image'; // Ganti ke JPEG biar ringan
 import { jsPDF } from 'jspdf';
 
 export default function CertificatePage() {
-  const hiddenRef = useRef<HTMLDivElement>(null); // Ref untuk "Master" yang di-download
+  const hiddenRef = useRef<HTMLDivElement>(null); 
   const [userName, setUserName] = useState("Jiwa yang Berani");
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [inputName, setInputName] = useState("");
@@ -33,22 +33,27 @@ export default function CertificatePage() {
   const handleDownload = async () => {
     if (!hiddenRef.current) return;
     setIsDownloading(true);
+    
     try {
-      // Ambil gambar dari elemen MASTER (Hidden) dengan Pixel Ratio Tinggi
-      const dataUrl = await toPng(hiddenRef.current, { 
-        quality: 1.0, 
-        pixelRatio: 3, // Biar hasil PDF tajam (HD)
-        cacheBust: true 
+      // 1. Ambil sebagai JPEG dengan Pixel Ratio 2 (Sudah sangat cukup buat print A4)
+      const dataUrl = await toJpeg(hiddenRef.current, { 
+        quality: 0.8, // Kompresi 80% (Sweet spot tajam vs ringan)
+        pixelRatio: 2, 
+        cacheBust: true,
+        backgroundColor: '#ffffff'
       });
 
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true // Aktifkan kompresi internal PDF
       });
 
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 297, 210); // Ukuran A4 Landscape dalam mm
+      // 2. Masukkan ke PDF (297x210 adalah mm untuk A4 Landscape)
+      pdf.addImage(dataUrl, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
       pdf.save(`Sertifikat-${userName}.pdf`);
+      
     } catch (err) {
       console.error(err);
       alert("Gagal mengunduh sertifikat, coba lagi bro!");
@@ -65,7 +70,7 @@ export default function CertificatePage() {
     }
   };
 
-  // Komponen Sertifikat (Dibuat fungsi agar isinya selalu sama antara Preview & Master)
+  // Komponen Sertifikat (Source of Truth)
   const CertificateContent = () => (
     <div className="flex-1 border-2 border-[#d1fae5] m-1 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center bg-white">
       {/* Background Ornaments */}
@@ -122,29 +127,29 @@ export default function CertificatePage() {
   return (
     <main className="min-h-dvh bg-[#fafaf9] flex flex-col items-center p-4 overflow-hidden font-sans">
       
-      {/* 1. MASTER RENDER (Tersembunyi dari user, khusus buat di-foto jadi PDF) */}
+      {/* 1. MASTER RENDER (Hidden) */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
         <div 
           ref={hiddenRef}
-          className="w-[1123px] h-[794px] border-[16px] border-[#ecfdf5] p-2 flex flex-col"
+          className="w-[1123px] h-[794px] border-[16px] border-[#ecfdf5] p-2 flex flex-col bg-white"
         >
           <CertificateContent />
         </div>
       </div>
 
-      {/* 2. UI HEADER & MODAL */}
+      {/* 2. MODAL INPUT NAMA */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
-            <h2 className="text-2xl font-bold text-center mb-6">Tulis Namamu</h2>
+            <h2 className="text-2xl font-bold text-center mb-6 text-[#1c1917]">Tulis Namamu</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input 
                 type="text" autoFocus value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
-                className="w-full px-6 py-4 bg-[#f5f5f4] rounded-2xl outline-none border-2 border-transparent focus:border-[#10b981]"
+                className="w-full px-6 py-4 bg-[#f5f5f4] rounded-2xl outline-none border-2 border-transparent focus:border-[#10b981] font-semibold text-[#1c1917]"
                 placeholder="Nama Lengkap..."
               />
-              <button type="submit" className="w-full py-4 bg-[#059669] text-white rounded-2xl font-bold">
+              <button type="submit" className="w-full py-4 bg-[#059669] text-white rounded-2xl font-bold hover:bg-[#047857] transition-colors">
                 Terapkan Nama
               </button>
             </form>
@@ -152,20 +157,27 @@ export default function CertificatePage() {
         </div>
       )}
 
+      {/* 3. NAVIGASI */}
       <nav className="w-full max-w-4xl flex justify-between items-center mb-6 shrink-0 z-50">
-        <Link href="/" className="flex items-center gap-2 text-[#a8a29e] hover:text-[#047857]">
+        <Link href="/" className="flex items-center gap-2 text-[#a8a29e] hover:text-[#047857] transition-colors">
           <Home size={20} /> <span className="font-bold text-sm">Beranda</span>
         </Link>
         <button 
           onClick={handleDownload}
           disabled={isDownloading}
-          className="flex items-center gap-2 bg-[#10b981] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg active:scale-95 transition-all disabled:opacity-50"
+          className="flex items-center gap-2 bg-[#10b981] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isDownloading ? "Memproses..." : <><Download size={16} /> <span>Unduh PDF HD</span></>}
+          {isDownloading ? (
+            "Sedang Mengompres..."
+          ) : (
+            <>
+              <Download size={16} /> <span>Unduh PDF (Ringan)</span>
+            </>
+          )}
         </button>
       </nav>
 
-      {/* 3. PREVIEW RENDER (Yang dilihat user) */}
+      {/* 4. PREVIEW RENDER (User View) */}
       <div className="flex-1 w-full flex items-center justify-center relative">
         <div 
           style={{ 
@@ -179,7 +191,7 @@ export default function CertificatePage() {
       </div>
 
       <div className="mt-auto pt-4 text-[#a8a29e] text-[10px] font-bold text-center tracking-widest uppercase shrink-0">
-        *Preview otomatis menyesuaikan layar perangkatmu
+        *Hasil PDF sudah dioptimalkan agar ringan (HD)
       </div>
     </main>
   );
