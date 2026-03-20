@@ -15,7 +15,7 @@ export default function CertificatePage() {
     const handleResize = () => {
       const padding = 32; 
       const availableWidth = window.innerWidth - padding;
-      const availableHeight = window.innerHeight - 200; // Space buat nav & text bawah
+      const availableHeight = window.innerHeight - 200; 
       
       const scaleWidth = availableWidth / 1123;
       const scaleHeight = availableHeight / 794;
@@ -46,9 +46,9 @@ export default function CertificatePage() {
   return (
     <main className="min-h-dvh bg-[#fafaf9] flex flex-col items-center p-4 overflow-hidden font-sans">
       
-      {/* Modal Input Nama (Tetap sama) */}
+      {/* Modal Input Nama */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
             <div className="text-center mb-6">
               <div className="bg-[#f0fdf4] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -86,7 +86,7 @@ export default function CertificatePage() {
         </button>
       </nav>
 
-      {/* AREA SERTIFIKAT - FIX PREVIEW */}
+      {/* AREA SERTIFIKAT */}
       <div className="flex-1 w-full flex items-center justify-center relative overflow-hidden">
         <div 
           ref={certificateRef}
@@ -94,15 +94,14 @@ export default function CertificatePage() {
             transform: `scale(${zoom})`,
             transformOrigin: 'center center',
             backgroundColor: '#ffffff',
-            position: 'absolute', // Membuatnya melayang di tengah container
+            position: 'absolute',
           }}
-          className="w-[1123px] h-[794px] border-[16px] border-[#ecfdf5] p-2 flex flex-col shadow-2xl shrink-0"
+          className="w-280.75 h-198.5 border-16 border-[#ecfdf5] p-2 flex flex-col shadow-2xl shrink-0"
         >
           <div className="flex-1 border-2 border-[#d1fae5] m-1 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center">
             
-            {/* Background Ornaments */}
-            <div className="absolute top-[-25%] right-[-15%] w-[500px] h-[500px] bg-[#d1fae5] opacity-40 rounded-full blur-3xl" />
-            <div className="absolute bottom-[-20%] left-[-10%] w-[384px] h-[384px] bg-[#f0fdfa] rounded-full blur-3xl" />
+            <div className="absolute top-[-25%] right-[-15%] w-125 h-125 bg-[#d1fae5] opacity-40 rounded-full blur-3xl" />
+            <div className="absolute bottom-[-20%] left-[-10%] w-96 h-96 bg-[#f0fdfa] rounded-full blur-3xl" />
             
             <div className="relative z-10 flex flex-col items-center mb-8">
               <div className="p-5 bg-[#f0fdf4] rounded-full mb-4 border border-[#d1fae5] relative">
@@ -117,7 +116,7 @@ export default function CertificatePage() {
               <div className="mb-12 py-5 border-b-2 border-[#d1fae5] inline-block px-16 relative">
                 <p className="text-[11px] uppercase text-[#10b981] font-black mb-3 tracking-[0.3em]">Diberikan kepada</p>
                 <h3 className="text-6xl font-black text-[#1c1917] tracking-tight">{userName}</h3>
-                <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 bg-[#ffffff] px-3">
+                <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-[#ffffff] px-3">
                    <ShieldCheck size={18} className="text-[#6ee7b7]" />
                 </div>
               </div>
@@ -139,8 +138,8 @@ export default function CertificatePage() {
               </div>
 
               <div className="flex flex-col items-center">
-                <p className="font-serif italic text-5xl text-[#064e3b] opacity-30 mb-[-12px] select-none">M. Ikhsan</p>
-                <div className="w-52 h-[2px] bg-[#d1fae5] mb-2" />
+                <p className="font-serif italic text-5xl text-[#064e3b] opacity-30 -mb-3 select-none">M. Ikhsan</p>
+                <div className="w-52 h-0.5 bg-[#d1fae5] mb-2" />
                 <p className="text-[11px] font-black uppercase text-[#1c1917] tracking-[0.2em]">Muhamad Ikhsan</p>
                 <p className="text-[9px] text-[#059669] font-bold uppercase tracking-widest">Konselor Utama & Pengembang</p>
               </div>
