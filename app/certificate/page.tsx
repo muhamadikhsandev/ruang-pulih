@@ -13,15 +13,17 @@ export default function CertificatePage() {
 
   useEffect(() => {
     const handleResize = () => {
-      const padding = 24; 
-      const headerFooterSpace = 160; 
+      const padding = 32; 
       const availableWidth = window.innerWidth - padding;
-      const availableHeight = window.innerHeight - headerFooterSpace;
+      const availableHeight = window.innerHeight - 200; // Space buat nav & text bawah
+      
       const scaleWidth = availableWidth / 1123;
       const scaleHeight = availableHeight / 794;
+      
       const finalScale = Math.min(scaleWidth, scaleHeight);
       setZoom(finalScale > 1 ? 1 : finalScale); 
     };
+
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -29,13 +31,8 @@ export default function CertificatePage() {
 
   const handleDownload = async () => {
     if (!certificateRef.current) return;
-    try {
-      const { generatePDF } = await import('./downloader');
-      await generatePDF(certificateRef.current);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Gagal mengunduh PDF karena masalah format warna browser. Coba refresh bro.");
-    }
+    const { generatePDF } = await import('./downloader');
+    await generatePDF(certificateRef.current);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -49,7 +46,7 @@ export default function CertificatePage() {
   return (
     <main className="min-h-dvh bg-[#fafaf9] flex flex-col items-center p-4 overflow-hidden font-sans">
       
-      {/* Modal Input Nama */}
+      {/* Modal Input Nama (Tetap sama) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
@@ -57,8 +54,7 @@ export default function CertificatePage() {
               <div className="bg-[#f0fdf4] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award className="text-[#059669]" size={32} />
               </div>
-              <h2 className="text-2xl font-bold text-[#1c1917] tracking-tight">Tulis Namamu</h2>
-              <p className="text-[#78716c] text-sm mt-2">Nama ini akan terukir di Sertifikat Apresiasi Dirimu.</p>
+              <h2 className="text-2xl font-bold text-[#1c1917]">Tulis Namamu</h2>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input 
@@ -67,9 +63,9 @@ export default function CertificatePage() {
                 placeholder="Masukkan nama lengkap..."
                 value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
-                className="w-full px-6 py-4 bg-[#f5f5f4] border-2 border-transparent focus:border-[#10b981] focus:bg-white rounded-2xl outline-none font-semibold text-[#1c1917]"
+                className="w-full px-6 py-4 bg-[#f5f5f4] border-2 border-transparent focus:border-[#10b981] rounded-2xl outline-none font-semibold"
               />
-              <button type="submit" className="w-full py-4 bg-[#059669] text-white rounded-2xl font-bold shadow-lg shadow-[#d1fae5] active:scale-95 transition-all">
+              <button type="submit" className="w-full py-4 bg-[#059669] text-white rounded-2xl font-bold active:scale-95 transition-all">
                 Terapkan Nama
               </button>
             </form>
@@ -77,28 +73,28 @@ export default function CertificatePage() {
         </div>
       )}
 
-      <nav className="w-full max-w-4xl flex justify-between items-center mb-6 shrink-0">
+      <nav className="w-full max-w-4xl flex justify-between items-center mb-6 shrink-0 z-50">
         <Link href="/" className="flex items-center gap-2 text-[#a8a29e] hover:text-[#047857]">
           <Home size={20} />
-          <span className="font-bold text-sm tracking-tight">Beranda</span>
+          <span className="font-bold text-sm">Beranda</span>
         </Link>
         <button 
           onClick={handleDownload}
-          className="flex items-center gap-2 bg-[#10b981] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-[#d1fae5] active:scale-95 transition-all"
+          className="flex items-center gap-2 bg-[#10b981] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg active:scale-95 transition-all"
         >
           <Download size={16} /> <span>Unduh PDF</span>
         </button>
       </nav>
 
-      {/* AREA SERTIFIKAT - SEMUA WARNA MENGGUNAKAN HEX AGAR TIDAK ERROR LAB/OKLCH */}
-      <div className="flex-1 w-full flex items-center justify-center overflow-hidden relative">
+      {/* AREA SERTIFIKAT - FIX PREVIEW */}
+      <div className="flex-1 w-full flex items-center justify-center relative overflow-hidden">
         <div 
           ref={certificateRef}
           style={{ 
             transform: `scale(${zoom})`,
             transformOrigin: 'center center',
-            backgroundColor: '#ffffff', // Pakai inline style untuk warna krusial
-            color: '#1c1917'
+            backgroundColor: '#ffffff',
+            position: 'absolute', // Membuatnya melayang di tengah container
           }}
           className="w-[1123px] h-[794px] border-[16px] border-[#ecfdf5] p-2 flex flex-col shadow-2xl shrink-0"
         >
@@ -138,7 +134,7 @@ export default function CertificatePage() {
                 </div>
                 <div>
                   <span className="text-md font-black uppercase text-[#064e3b] block mb-1 leading-none">Ruang Pulih</span>
-                  <p className="text-[10px] text-[#059669] font-bold uppercase tracking-widest">ID: RP-{Math.floor(1000 + Math.random() * 9000)}</p>
+                  <p className="text-[10px] text-[#059669] font-bold uppercase tracking-widest">Verifikasi Digital Aktif</p>
                 </div>
               </div>
 
@@ -156,8 +152,8 @@ export default function CertificatePage() {
         </div>
       </div>
 
-      <div className="mt-auto pt-6 text-[#a8a29e] text-[10px] font-bold text-center tracking-widest uppercase shrink-0">
-        *Preview otomatis menyesuaikan layar perangkatmu
+      <div className="mt-auto pt-4 text-[#a8a29e] text-[10px] font-bold text-center tracking-widest uppercase shrink-0">
+        *Tampilan dioptimalkan untuk perangkatmu
       </div>
     </main>
   );
