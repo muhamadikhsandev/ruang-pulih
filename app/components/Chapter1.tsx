@@ -22,7 +22,7 @@ export default function Chapter1({ onNext, onScoreUpdate }: ChapterProps) {
     "Apakah kamu sering mengkritik dirimu sendiri dengan kata-kata kasar?",
     "Apakah kamu merasa harus menyembunyikan emosi sedihmu?",
     "Seringkah kamu merasa cemas tanpa alasan yang jelas di keramaian?",
-    "Apakah kamu merasakan sulit mempercayai niat baik orang lain?"
+    "Apakah kamu merasa sulit mempercayai niat baik orang lain?"
   ];
 
   const handleAnswer = (isYes: boolean) => {
@@ -32,7 +32,7 @@ export default function Chapter1({ onNext, onScoreUpdate }: ChapterProps) {
     if (step < questions.length - 1) {
       setStep(step + 1);
     } else {
-      // Selesai, kirim score ke parent (dikali 10 untuk persentase jika mau)
+      // Selesai, kirim score ke parent
       onScoreUpdate(newScore);
       setStep(step + 1); // Masuk ke screen "Selesai"
     }
@@ -56,7 +56,8 @@ export default function Chapter1({ onNext, onScoreUpdate }: ChapterProps) {
           </div>
         )}
 
-        <div className="relative bg-white rounded-[2.5rem] shadow-2xl p-10 border border-rose-50/50 min-h-[550px] flex flex-col overflow-hidden">
+        {/* Updated: min-h-137.5 replaces min-h-[550px] */}
+        <div className="relative bg-white rounded-[2.5rem] shadow-2xl p-10 border border-rose-50/50 min-h-137.5 flex flex-col overflow-hidden">
           {isReading ? (
             /* Intro Section */
             <div className="animate-in fade-in zoom-in-95 duration-1000 flex flex-col h-full justify-center">
@@ -84,7 +85,8 @@ export default function Chapter1({ onNext, onScoreUpdate }: ChapterProps) {
                 <span className="text-[10px] font-bold tracking-widest text-rose-400 uppercase">
                   Pertanyaan {step + 1}/{questions.length}
                 </span>
-                <h3 className="text-xl font-bold text-stone-800 leading-snug mt-4 min-h-[80px]">
+                {/* Updated: min-h-20 replaces min-h-[80px] */}
+                <h3 className="text-xl font-bold text-stone-800 leading-snug mt-4 min-h-20">
                   {questions[step]}
                 </h3>
               </div>
@@ -99,7 +101,7 @@ export default function Chapter1({ onNext, onScoreUpdate }: ChapterProps) {
                   onClick={() => handleAnswer(false)} 
                   className="w-full text-left p-5 rounded-2xl bg-stone-50/50 border border-stone-100 text-stone-600 text-sm font-semibold hover:bg-stone-100 transition-all hover:translate-x-1"
                 >
-                  Jarang / Tidak Pernah
+                  Jarangan / Tidak Pernah
                 </button>
               </div>
             </div>

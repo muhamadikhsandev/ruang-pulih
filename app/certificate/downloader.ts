@@ -1,23 +1,38 @@
-// app/certificate/downloader.ts
-export const generatePDF = async (element: HTMLElement) => {
-  // @ts-ignore - html2pdf tidak punya types resmi yang bagus
-  const html2pdf = (await import('html2pdf.js')).default;
+export const generatePDF = async (element: HTMLElement): Promise<void> => {
+  try {
+    // @ts-ignore - html2pdf tidak punya types resmi yang up-to-date
+    const html2pdf = (await import('html2pdf.js')).default;
 
-  const options = {
-    margin: 0,
-    filename: 'Sertifikat-Ruang-Pulih.pdf',
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { 
-      scale: 3, // Bikin hasil download TAJAM (High Res)
-      useCORS: true, 
-      letterRendering: true,
-    },
-    jsPDF: { 
-      unit: 'mm', 
-      format: 'a4', 
-      orientation: 'landscape' 
-    }
-  };
+    if (!element) return;
 
-  html2pdf().set(options).from(element).save();
+    const options = {
+      margin: 0,
+      filename: 'Sertifikat-Ruang-Pulih.pdf',
+      image: { 
+        type: 'jpeg' as const, // Pakai 'as const' supaya tipenya bukan string biasa
+        quality: 1 
+      },
+      html2canvas: { 
+        scale: 3, 
+        useCORS: true, 
+        letterRendering: true,
+        logging: false,
+      },
+      jsPDF: { 
+        unit: 'mm' as const, 
+        format: 'a4' as const, 
+        orientation: 'landscape' as const 
+      }
+    };
+
+    // PENTING: Simpan instance-nya dulu baru eksekusi
+    const worker = html2pdf().set(options).from(element);
+    
+    // Tunggu proses save selesai
+    await worker.save();
+
+    console.log("PDF Berhasil diunduh!");
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+  }
 };
