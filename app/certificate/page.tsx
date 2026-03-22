@@ -36,7 +36,14 @@ function CertificateContentWrapper() {
 
   // Ambil skor otomatis dari URL dashboard
   const score = searchParams.get('score') || "0";
-  const VERIFY_URL = "https://ruangpulih.vercel.app/verify";
+
+  // Fungsi untuk membuat slug nama (Budi Utomo -> Budi-Utomo)
+  const getNameSlug = (name: string) => {
+    return name.trim().replace(/\s+/g, '-');
+  };
+
+  // Link Verifikasi Dinamis berdasarkan nama
+  const dynamicVerifyUrl = `https://ruangpulih.vercel.app/verify/${getNameSlug(userName)}`;
 
   useEffect(() => {
     const handleResize = () => {
@@ -120,13 +127,16 @@ function CertificateContentWrapper() {
 
       <div className="relative z-10 w-full flex justify-between items-end mt-12 px-16">
         <div className="flex items-center gap-6 text-left">
-          <a href={VERIFY_URL} target="_blank" className="p-2 bg-white border rounded-xl shadow-sm hover:scale-105 transition-transform" style={{ borderColor: theme.light }}>
-            <QRCodeCanvas value={VERIFY_URL} size={70} level="H" fgColor={theme.text} />
+          {/* QR Code Dinamis ke Link Nama */}
+          <a href={dynamicVerifyUrl} target="_blank" className="p-2 bg-white border rounded-xl shadow-sm hover:scale-105 transition-transform" style={{ borderColor: theme.light }}>
+            <QRCodeCanvas value={dynamicVerifyUrl} size={70} level="H" fgColor={theme.text} />
           </a>
           <div>
             <span className="text-md font-black uppercase block mb-1 leading-none" style={{ color: theme.text }}>Ruang Pulih</span>
-            <a href={VERIFY_URL} target="_blank" className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 hover:underline text-stone-400">
-              <CheckCircle2 size={10} style={{ color: theme.accent }} /> ruangpulih.vercel.app/verify
+            {/* Link Teks Dinamis ke Link Nama */}
+            <a href={dynamicVerifyUrl} target="_blank" className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 hover:underline text-stone-400">
+              <CheckCircle2 size={10} style={{ color: theme.accent }} /> 
+              ruangpulih.vercel.app/verify/{getNameSlug(userName)}
             </a>
           </div>
         </div>
@@ -143,14 +153,12 @@ function CertificateContentWrapper() {
   return (
     <main className="fixed inset-0 bg-[#fafaf9] flex flex-col items-center overflow-hidden font-sans">
       
-      {/* Render Tersembunyi */}
       <div className="absolute left-[-9999px] top-0 pointer-events-none">
         <div ref={hiddenRef} className="w-[1123px] h-[794px] border-[16px] p-2 flex flex-col bg-white" style={{ borderColor: theme.ultraLight }}>
           <CertificateBody />
         </div>
       </div>
 
-      {/* Modal Input Nama */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-md">
           <div className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
@@ -170,7 +178,6 @@ function CertificateContentWrapper() {
         </div>
       )}
 
-      {/* Header */}
       <nav className="w-full max-w-5xl flex justify-between items-center px-4 py-4 md:px-8 md:py-6 shrink-0 z-50">
         <div className="flex gap-2">
           <Link href="/" className="p-3 bg-white rounded-full shadow-sm border border-stone-100 hover:bg-stone-50">
@@ -210,7 +217,6 @@ function CertificateContentWrapper() {
         </div>
       </nav>
 
-      {/* Preview Area */}
       <div className="flex-1 w-full flex items-center justify-center p-4 relative overflow-hidden">
         <div 
           style={{ 
@@ -225,7 +231,6 @@ function CertificateContentWrapper() {
         </div>
       </div>
 
-      {/* Selector Tema */}
       <div className="py-6 flex flex-col items-center gap-4 z-50 bg-white/80 w-full backdrop-blur-md border-t border-stone-100 shrink-0">
         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-400">Pilih Tema Sertifikat</p>
         <div className="flex gap-5">
@@ -246,7 +251,6 @@ function CertificateContentWrapper() {
   );
 }
 
-// Wrapper Suspense diperlukan karena menggunakan useSearchParams di Next.js
 export default function CertificatePage() {
   return (
     <Suspense fallback={<div className="flex h-screen items-center justify-center">Memuat Sertifikat...</div>}>
