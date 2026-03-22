@@ -111,13 +111,14 @@ export default function FinalDashboard({ scores, onReset }: { scores: Scores, on
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-4 pb-12">
-          <Link 
-            href="/certificate" 
-            className="flex items-center justify-center gap-3 py-5 bg-stone-800 text-white rounded-3xl font-bold shadow-2xl hover:bg-black transition-all active:scale-[0.97] group"
-          >
-            <Award size={20} className="group-hover:rotate-12 transition-transform text-amber-400" />
-            Ambil Sertifikat Pulih
-          </Link>
+
+<Link 
+  href={`/certificate?score=${avgPercent}`} 
+  className="flex items-center justify-center gap-3 py-5 bg-stone-800 text-white rounded-3xl font-bold shadow-2xl hover:bg-black transition-all active:scale-[0.97] group"
+>
+  <Award size={20} className="group-hover:rotate-12 transition-transform text-amber-400" />
+  Ambil Sertifikat Pulih
+</Link>
 
           <div className="grid grid-cols-2 gap-4">
             <button 

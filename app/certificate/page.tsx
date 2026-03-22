@@ -1,12 +1,12 @@
 "use client";
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Award, Home, Leaf, ShieldCheck, CheckCircle2, Edit3, Sparkles, Download, FileText, Image as ImageIcon, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
 import { toJpeg, toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
-// Definisi Tipe untuk Template
 interface ThemeTemplate {
   id: string;
   accent: string;
@@ -24,7 +24,7 @@ const TEMPLATES: ThemeTemplate[] = [
 ];
 
 export default function CertificatePage() {
-  const hiddenRef = useRef(null);
+  const hiddenRef = useRef<HTMLDivElement>(null); 
   const [userName, setUserName] = useState("Jiwa yang Berani");
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [inputName, setInputName] = useState("");
@@ -32,6 +32,10 @@ export default function CertificatePage() {
   const [zoom, setZoom] = useState(0.3);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDownloadOptions, setShowDownloadOptions] = useState(false);
+
+  // Ambil skor otomatis dari URL dashboard
+  const score = searchParams.get('score') || "0";
+  const VERIFY_URL = "https://ruangpulih.vercel.app/verify";
 
   useEffect(() => {
     const handleResize = () => {
@@ -46,43 +50,39 @@ export default function CertificatePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Simpan sebagai Gambar (PNG)
   const downloadAsImage = async () => {
     if (!hiddenRef.current || isDownloading) return;
     setIsDownloading(true);
     setShowDownloadOptions(false);
     try {
-      const dataUrl = await toPng(hiddenRef.current, {
-        quality: 1,
-        pixelRatio: 3,
-        cacheBust: true
+      const dataUrl = await toPng(hiddenRef.current, { 
+        quality: 1, 
+        pixelRatio: 3, 
+        cacheBust: true 
       });
       const link = document.createElement('a');
       link.download = `Sertifikat-${userName}.png`;
       link.href = dataUrl;
       link.click();
-    } catch (err) {
-      alert("Gagal mengunduh gambar.");
-    } finally { setIsDownloading(false); }
+    } catch (err) { alert("Gagal mengunduh gambar."); } 
+    finally { setIsDownloading(false); }
   };
 
-  // Simpan sebagai PDF
   const downloadAsPDF = async () => {
     if (!hiddenRef.current || isDownloading) return;
     setIsDownloading(true);
     setShowDownloadOptions(false);
     try {
-      const dataUrl = await toJpeg(hiddenRef.current, {
-        quality: 0.95,
+      const dataUrl = await toJpeg(hiddenRef.current, { 
+        quality: 0.95, 
         pixelRatio: 2,
-        cacheBust: true
+        cacheBust: true 
       });
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       pdf.addImage(dataUrl, 'JPEG', 0, 0, 297, 210);
       pdf.save(`Sertifikat-${userName}.pdf`);
-    } catch (err) {
-      alert("Gagal mengunduh PDF.");
-    } finally { setIsDownloading(false); }
+    } catch (err) { alert("Gagal mengunduh PDF."); } 
+    finally { setIsDownloading(false); }
   };
 
   const theme = TEMPLATES[activeTemplate];
@@ -92,10 +92,10 @@ export default function CertificatePage() {
 
   // Komponen Inti Sertifikat
   const CertificateContent = () => (
-    <div className="flex-1 border-2 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center bg-white w-full h-full" style={{ borderColor: theme.light }}>
+    <div className="flex-1 border-2 relative overflow-hidden flex flex-col items-center justify-center p-12 text-center bg-white" style={{ borderColor: theme.light }}>
       <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full blur-3xl opacity-30" style={{ backgroundColor: theme.light }} />
       <div className="absolute bottom-[-15%] left-[-5%] w-[400px] h-[400px] rounded-full blur-3xl opacity-20" style={{ backgroundColor: theme.ultraLight }} />
-
+      
       <div className="relative z-10 flex flex-col items-center mb-6">
         <div className="p-5 rounded-full mb-4 border relative shadow-sm" style={{ backgroundColor: theme.ultraLight, borderColor: theme.light }}>
           <Award size={54} style={{ color: theme.accent }} />
@@ -114,7 +114,8 @@ export default function CertificatePage() {
           </div>
         </div>
         <p className="text-stone-600 text-sm max-w-2xl mx-auto leading-relaxed font-medium mb-6">
-          Atas keberanianmu mengakui luka dan memilih untuk tetap bertumbuh. Sertifikat ini adalah saksi bisu perjalananmu menuju diri yang lebih utuh.
+          Atas keberanianmu mengakui luka dan memilih untuk tetap bertumbuh. 
+          Sertifikat ini adalah saksi bisu perjalananmu menuju diri yang lebih utuh.
         </p>
         <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest" style={{ borderColor: theme.light, color: theme.accent, backgroundColor: theme.ultraLight }}>
           <Sparkles size={12} /> Terverifikasi Ruang Pulih 2026
@@ -123,43 +124,37 @@ export default function CertificatePage() {
 
       <div className="relative z-10 w-full flex justify-between items-end mt-12 px-16">
         <div className="flex items-center gap-6 text-left">
-          {/* Perubahan di sini: Mengubah div menjadi tag a (link) agar bisa diklik */}
-          <a
-            href={verifyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 bg-white border rounded-xl shadow-sm block hover:opacity-80 transition-opacity cursor-pointer title"
-            style={{ borderColor: theme.light }}
-            title="Klik untuk cek link verifikasi"
-          >
-            <QRCodeCanvas value={verifyUrl} size={70} level="H" fgColor={theme.text} />
-          </a>
+          <div className="p-2 bg-white border rounded-xl shadow-sm" style={{ borderColor: theme.light }}>
+            <QRCodeCanvas value={`verify-${userName}`} size={70} level="H" fgColor={theme.text} />
+          </div>
           <div>
             <span className="text-md font-black uppercase block mb-1 leading-none" style={{ color: theme.text }}>Ruang Pulih</span>
-            <p className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1" style={{ color: theme.accent }}>
-              <CheckCircle2 size={10} /> Valid Digital Signature
-            </p>
+            <a href={VERIFY_URL} target="_blank" className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 hover:underline text-stone-400">
+              <CheckCircle2 size={10} style={{ color: theme.accent }} /> ruangpulih.vercel.app/verify
+            </a>
           </div>
         </div>
         <div className="flex flex-col items-center">
           <p className="font-serif italic text-4xl opacity-20 mb-[-10px] select-none" style={{ color: theme.text }}>M. Ikhsan</p>
           <div className="w-48 h-[1.5px] mb-2" style={{ backgroundColor: theme.light }} />
           <p className="text-[10px] font-black uppercase text-stone-900 tracking-[0.2em]">Muhamad Ikhsan</p>
+          <p className="text-[8px] font-bold uppercase text-stone-400 tracking-[0.1em] mt-1">CEO & Founder Ruang Pulih</p>
         </div>
       </div>
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-stone-50 flex flex-col items-center relative overflow-hidden">
+    <main className="fixed inset-0 bg-[#fafaf9] flex flex-col items-center overflow-hidden font-sans">
+      
       {/* 1. Render Tersembunyi untuk Download (Tetap ada bingkai) */}
       <div className="absolute left-[-9999px] top-0 pointer-events-none">
         <div ref={hiddenRef} className="w-[1123px] h-[794px] border-[16px] p-2 flex flex-col bg-white" style={{ borderColor: theme.ultraLight }}>
-          <CertificateContent />
+          <CertificateBody />
         </div>
       </div>
 
-      {/* 2. Modal Ganti Nama */}
+      {/* Modal Input Nama */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-md">
           <div className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
@@ -171,56 +166,49 @@ export default function CertificatePage() {
                 setIsModalOpen(false);
               }
             }} className="space-y-4">
-              <input
-                type="text"
-                autoFocus
-                value={inputName}
-                onChange={(e) => setInputName(e.target.value)}
-                className="w-full px-6 py-4 bg-stone-50 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold text-center"
-                placeholder="Nama Lengkap"
-              />
+              <input type="text" autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} 
+                className="w-full px-6 py-4 bg-stone-50 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold text-center" 
+                placeholder="Nama Lengkap" />
               <button type="submit" className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:bg-emerald-700">
-                Terbitkan
+                Terbitkan Sertifikat
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* 3. Header Navigasi */}
+      {/* Header */}
       <nav className="w-full max-w-5xl flex justify-between items-center px-4 py-4 md:px-8 md:py-6 shrink-0 z-50">
         <div className="flex gap-2">
-          <Link href="/" className="p-3 bg-white rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors">
+          <Link href="/" className="p-3 bg-white rounded-full shadow-sm border border-stone-100 hover:bg-stone-50">
             <Home size={20} />
           </Link>
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-full font-bold text-xs transition-all active:scale-95 hover:shadow-md">
-            <Edit3 size={14} /> Nama
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-full font-bold text-xs">
+            <Edit3 size={14} /> Ganti Nama
           </button>
         </div>
 
-        {/* Tombol Simpan dengan Dropdown */}
         <div className="relative">
           <button
             onClick={() => setShowDownloadOptions(!showDownloadOptions)}
-            disabled={isDownloading}
-            className="flex items-center gap-2 bg-stone-900 text-white px-5 py-2.5 rounded-full font-bold text-xs shadow-xl active:scale-95 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 bg-stone-900 text-white px-5 py-2.5 rounded-full font-bold text-xs shadow-xl active:scale-95 transition-all"
           >
             {isDownloading ? "Memproses..." : <><Download size={14} /> Simpan <ChevronDown size={14} /></>}
           </button>
           
           {showDownloadOptions && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-stone-100 p-2 z-[60] animate-in slide-in-from-top-2">
-              <button onClick={downloadAsPDF} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 rounded-xl transition-colors text-left text-stone-800">
+              <button onClick={downloadAsPDF} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 rounded-xl transition-colors text-left">
                 <FileText size={18} className="text-rose-500" />
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold">Dokumen PDF</span>
+                  <span className="text-xs font-bold text-stone-800">Dokumen PDF</span>
                   <span className="text-[10px] text-stone-400">Terbaik untuk cetak</span>
                 </div>
               </button>
-              <button onClick={downloadAsImage} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 rounded-xl transition-colors text-left text-stone-800">
+              <button onClick={downloadAsImage} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 rounded-xl transition-colors text-left">
                 <ImageIcon size={18} className="text-blue-500" />
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold">Gambar PNG</span>
+                  <span className="text-xs font-bold text-stone-800">Gambar PNG</span>
                   <span className="text-[10px] text-stone-400">Siap share ke sosmed</span>
                 </div>
               </button>
@@ -229,24 +217,24 @@ export default function CertificatePage() {
         </div>
       </nav>
 
-      {/* 4. Preview Area (Bingkai Tebal Balik Lagi) */}
+      {/* Preview Area */}
       <div className="flex-1 w-full flex items-center justify-center p-4 relative overflow-hidden">
-        <div
-          style={{
-            width: '1123px',
-            height: '794px',
-            transform: `scale(${zoom})`,
+        <div 
+          style={{ 
+            width: '1123px', 
+            height: '794px', 
+            transform: `scale(${zoom})`, 
             transformOrigin: 'center center',
             borderColor: theme.ultraLight
           }}
           className="border-[16px] p-2 flex flex-col shadow-2xl bg-white transition-all duration-500 ease-out shrink-0"
         >
-          <CertificateContent />
+          <CertificateBody />
         </div>
       </div>
 
       {/* 5. Selector Tema */}
-      <div className="py-6 flex flex-col items-center gap-4 z-50 bg-white/80 w-full backdrop-blur-md border-t border-stone-100 shrink-0 mt-auto">
+      <div className="py-6 flex flex-col items-center gap-4 z-50 bg-white/80 w-full backdrop-blur-md border-t border-stone-100 shrink-0">
         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-400">Pilih Tema Sertifikat</p>
         <div className="flex gap-5">
           {TEMPLATES.map((t, i) => (
@@ -263,7 +251,6 @@ export default function CertificatePage() {
         </div>
       </div>
 
-      {/* Tutup Dropdown jika klik di luar */}
       {showDownloadOptions && <div className="fixed inset-0 z-40" onClick={() => setShowDownloadOptions(false)} />}
     </main>
   );
